@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Собери бургер</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f8f8f8;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #ingredients, #burger {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .ingredient {
+      width: 120px;
+      height: 40px;
+      background: #eee;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      line-height: 40px;
+      cursor: grab;
+      user-select: none;
+    }
+
+    #burger {
+      width: 240px;
+      margin: 0 auto;
+      min-height: 320px;
+      border: 2px dashed #aaa;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .layer {
+      width: 180px;
+      height: 30px;
+      margin: 5px 0;
+      border-radius: 6px;
+      line-height: 30px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .bun-top { background: #e0a143; }
+    .bun-bottom { background: #e0a143; }
+    .tomato { background: #e74c3c; }
+    .cheese { background: #f1c40f; color: black; }
+    .meat { background: #9a7100; }
+
+    #burger.complete {
+      border-color: green;
+    }
+
+    #clearBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #d33;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #clearBtn:hover {
+      background: #a00;
+    }
+
+    p.hint {
+      font-style: italic;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Собери бургер 🍔</h1>
+
+  <div id="ingredients">
+    <div class="ingredient bun-top" draggable="true" data-type="bun-top">Верхняя булка</div>
+    <div class="ingredient tomato" draggable="true" data-type="tomato">Помидор</div>
+    <div class="ingredient cheese" draggable="true" data-type="cheese">Сыр</div>
+    <div class="ingredient meat" draggable="true" data-type="meat">Котлета</div>
+    <div class="ingredient bun-bottom" draggable="true" data-type="bun-bottom">Нижняя булка</div>
+  </div>
+
+  <div id="burger" ondragover="event.preventDefault()" ondrop="dropIngredient(event)">
+    <p class="hint">Перетащи ингредиенты сюда. Кликни по слою, чтобы удалить его.</p>
+  </div>
+
+  <button id="clearBtn" onclick="clearBurger()">Очистить бургер</button>
+
+  <script>
+    const INGREDIENTS = {
+      "bun-top": "Верхняя булка",
+      "bun-bottom": "Нижняя булка",
+      "tomato": "Помидор",
+      "cheese": "Сыр",
+      "meat": "Котлета"
+    };
+
+    const CORRECT_ORDER = ["bun-top","tomato", "cheese", "meat", "bun-bottom"];
+
+    document.querySelectorAll(".ingredient").forEach(elem => {
+      elem.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/plain", e.target.dataset.type);
+      });
+    });
+
+    function dropIngredient(event) {
+      event.preventDefault();
+      const type = event.dataTransfer.getData("text/plain");
+      addLayer(type);
+    }
+
+    function addLayer(type) {
+      const burger = document.getElementById("burger");
+      const ingredient = document.createElement("div");
+      ingredient.className = `layer ${type}`;
+      ingredient.textContent = INGREDIENTS[type];
+
+      // Удаление по клику
+      ingredient.addEventListener("click", () => {
+        ingredient.remove();
+        checkBurger();
+      });
+
+      burger.appendChild(ingredient);
+      checkBurger();
+    }
+
+    function clearBurger() {
+      const burger = document.getElementById("burger");
+      burger.querySelectorAll(".layer").forEach(el => el.remove());
+      burger.classList.remove("complete");
+    }
+
+    function checkBurger() {
+      const layers = [...document.querySelectorAll("#burger .layer")].map(el => el.classList[1]);
+      const burgerBox = document.getElementById("burger");
+
+      if (layers.join() === CORRECT_ORDER.join()) {
+        burgerBox.classList.add("complete");
+        setTimeout(() => {
+          alert("✅ Молодец! Бургер собран правильно!");
+        }, 100);
+      } else {
+        burgerBox.classList.remove("complete");
+      }
+    }
+  </script>
+
+</body>
+</html>
